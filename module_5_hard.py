@@ -3,8 +3,21 @@ from time import sleep
 class User:
     def __init__(self, nickname: str, password, age: int):
         self.nickname = nickname
-        self.password = password
+        self.password = hash(password)
         self.age = age
+
+
+    def __str__(self):
+        return f'{self.nickname}'
+
+    def __eq__(self, other):
+        return other.nickname == self.nickname
+
+    def get_info(self):
+        return self.nickname, self.password
+
+
+
 
 
 class Video:
@@ -13,6 +26,9 @@ class Video:
         self.duration = duration
         self.time_now = time_now
         self.adult_mode = adult_mode
+
+    def __str__(self):
+        return self.title
 
 
 class UrTube:
@@ -24,7 +40,7 @@ class UrTube:
     def log_in(self, nickname, password):
 
         for user in self.users:
-            if user.nickname == nickname and user.password == password:
+            if (nickname, hash(password)) == user.get_info():
                 self.current_user = user
                 return
 
@@ -32,14 +48,13 @@ class UrTube:
 
 
     def register(self, nickname, password, age):
-        for user in self.users:
-            if user.nickname == nickname:
-                print(f'Пользователь с ником {nickname} уже существует!')
-                return
-
         new_user = User(nickname, password, age)
-        self.users.append(new_user)
-        UrTube.log_in(self, nickname, password)
+        if new_user not in self.users:
+            self.users.append(new_user)
+            UrTube.log_in(self, nickname, password)
+        else:
+            print(f'Пользователь с ником {nickname} уже существует!')
+
 
     def log_out(self):
         self.current_user = None
@@ -69,7 +84,7 @@ class UrTube:
                 break
 
         if film is None:
-            print('Данное видео отсутствует')
+            pass
         else:
             if self.current_user is None:
                 print('Войдите в аккаунт, чтобы смотреть видео')
@@ -79,7 +94,7 @@ class UrTube:
                 else:
                     for time in range(film.time_now, film.duration):
                         print(f'{time + 1}', end=' ')
-                        sleep(1)
+                        sleep(0.1)
                     print(f'Конец видео')
 
 
@@ -117,5 +132,11 @@ ur.watch_video('Для чего девушкам парень программи
 ur.register('vasya_pupkin', 'F8098FM8fjm9jmi', 55)
 print(ur.current_user)
 
+
 # Попытка воспроизведения несуществующего видео
 ur.watch_video('Лучший язык программирования 2024 года!')
+
+
+
+
+
